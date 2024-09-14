@@ -10,7 +10,7 @@ def execute_grep_on_logs(query):
     total_matches = 0
 
     for log_file in log_files:
-        command = ['egrep', '-n', query, log_file]
+        command = ['grep', '-E', '-n', query, log_file]
         try:
             grep_result = subprocess.check_output(command, stderr=subprocess.STDOUT, universal_newlines=True)
             matches = grep_result.strip().split('\n')
@@ -26,7 +26,7 @@ def execute_grep_on_logs(query):
         except subprocess.CalledProcessError:
             result += f"File: {log_file}\nNo matches found\n"
 
-    result += f"\nTotal Matches: {total_matches}\n"
+    result += f"\nNumber Matches: {total_matches}\n"
     return result, total_matches
 
 def handle_client(client_socket):
