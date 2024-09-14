@@ -26,7 +26,6 @@ def execute_grep_on_logs(query):
         except subprocess.CalledProcessError:
             result += f"File: {log_file}\nNo matches found\n"
 
-    result += f"\n"
     return result, total_matches
 
 def handle_client(client_socket):
