@@ -2,6 +2,7 @@ import socket
 import subprocess
 import re
 import os
+import argparse
 
 def execute_grep_on_logs(query):
     
