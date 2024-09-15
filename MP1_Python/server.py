@@ -1,91 +1,65 @@
 import socket
-import threading
+import subprocess
+import re
+import os
 
-lock = threading.Lock()
-total_matches = 0
-server_matches = {}
+def execute_grep_on_logs(query):
+    
+    log_files = [f for f in os.listdir() if f.endswith('.log')]
+    result = ""
+    total_matches = 0
+    file_name = ""
+    for log_file in log_files:
+        command = ['grep', '-E', '-n', query, log_file]
+        try:
+            grep_result = subprocess.check_output(command, stderr=subprocess.STDOUT, universal_newlines=True)
+            matches = grep_result.strip().split('\n')
 
-def send_query_to_server(server_ip, server_port, query):
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.settimeout(5)
+            if matches:
+                result += f"\nFile: {log_file}\n"
+                for match in matches:
+                    result += f"Line {match.split(':')[0]}: {match.split(':', 1)[1]}\n"
+                total_matches += len(matches)
+            else:
+                result += f"File: {log_file}\nNo matches found\n"
+        except subprocess.CalledProcessError:
+            result += f"File: {log_file}\nNo matches found\n"
+
+    return result, total_matches
+
+def handle_client(client_socket):
     try:
-        client.connect((server_ip, server_port))
-        client.send(query.encode('utf-8'))
-
-        response = ""
         while True:
-            chunk = client.recv(32768).decode('utf-8')
-            if "EOF" in chunk:
-                response += chunk.replace("EOF", "")
+            query = client_socket.recv(1024).decode('utf-8')
+            if not query or query.lower() == 'exit':
+                print("Client requested disconnection or sent empty query.")
                 break
-            response += chunk
+            
+            print(f"Received query: {query}")
+            
+            result, total_matches = execute_grep_on_logs(query)
 
-        print(f"\nResults from {server_ip}:{server_port}:\n{response}")
+            client_socket.send(result.encode('utf-8'))
+            
+            client_socket.send(b"EOF")
 
-        file_name = [line for line in response.split('\n') if line.startswith('File:')]
-        if file_name:
-            name = file_name[0].split(':')[1].strip()
-        
-        matches_part = [line for line in response.split('\n') if line.startswith('TOTAL_MATCHES:')]
-        if matches_part:
-            total_matches = int(matches_part[0].split(':')[1].strip())
-            server_matches[name] = total_matches
-            return total_matches
-
-        return 0
-    except Exception as e:
-        print(f"Error connecting to {server_ip}:{server_port}: {e}")
-        return 0
+            client_socket.send(f"TOTAL_MATCHES:{total_matches}".encode('utf-8'))
+            break
     finally:
-        client.close()
+        client_socket.close()
+        print("Connection closed with the client.")
 
-def query_server(ip, port, query):
-    global total_matches
-    matches = send_query_to_server(ip, port, query)
-    with lock:
-        total_matches += matches
 
 def main():
-    servers = [
-        ('172.22.95.32', 9999),
-        ('172.22.157.33', 9999),
-        ('172.22.159.33', 9999),
-        ('172.22.95.33', 9999),
-        ('172.22.157.34', 9999),
-        ('172.22.159.34', 9999),
-        ('172.22.95.34', 9999),
-        ('172.22.157.35', 9999),
-        ('172.22.159.35', 9999),
-        ('172.22.95.35', 9999),
-        # ('10.193.255.134', 9999)
-    ]
-
-    try:
-        while True:
-            query = input("Enter search pattern (or type 'exit' to disconnect): ")
-            if query.lower() == 'exit':
-                print("Disconnecting from all servers...")
-                break
-
-            global total_matches
-            total_matches = 0
-            server_matches.clear()
-
-            threads = []
-            for server_ip, server_port in servers:
-                thread = threading.Thread(target=query_server, args=(server_ip, server_port, query))
-                threads.append(thread)
-                thread.start()
-
-            for thread in threads:
-                thread.join()
-
-            for name, matches in server_matches.items():
-                print(f"\nFile: {name}: {matches} matches")
-
-            print(f"Total matches across all servers: {total_matches}")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(('0.0.0.0', 9999))
+    server.listen(5)
+    print("Server listening on port 9999")
+    
+    while True:
+        client_socket, addr = server.accept()
+        print(f"Accepted connection from {addr}")
+        handle_client(client_socket)
 
 if __name__ == "__main__":
     main()
