@@ -8,8 +8,8 @@ This project implements a basic client-server architecture for querying log file
 ## Structur
 
 project_root/
-├── cs425_g87/
-└── xxx.log   <-- Log file go here
+ ├── cs425_g87/
+ └── xxx.log   <-- Log file go here
 
 
 ## How to run
