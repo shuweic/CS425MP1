@@ -3,6 +3,7 @@ import threading
 
 lock = threading.Lock()
 total_matches = 0
+server_matches = {}
 
 def send_query_to_server(server_ip, server_port, query):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,9 +22,14 @@ def send_query_to_server(server_ip, server_port, query):
 
         print(f"\nResults from {server_ip}:{server_port}:\n{response}")
 
+        file_name = [line for line in response.split('\n') if line.startswith('File:')]
+        if file_name:
+            name = file_name[0].split(':')[1].strip()
+        
         matches_part = [line for line in response.split('\n') if line.startswith('TOTAL_MATCHES:')]
         if matches_part:
             total_matches = int(matches_part[0].split(':')[1].strip())
+            server_matches[name] = total_matches
             return total_matches
 
         return 0
@@ -41,17 +47,17 @@ def query_server(ip, port, query):
 
 def main():
     servers = [
-        ('172.22.95.32', 9999),
-        ('172.22.157.33', 9999),
-        ('172.22.159.33', 9999),
-        ('172.22.95.33', 9999),
-        ('172.22.157.34', 9999),
-        ('172.22.159.34', 9999),
-        ('172.22.95.34', 9999),
-        ('172.22.157.35', 9999),
-        ('172.22.159.35', 9999),
-        ('172.22.95.35', 9999),
-        # ('192.168.10.12', 9999)
+        # ('172.22.95.32', 9999),
+        # ('172.22.157.33', 9999),
+        # ('172.22.159.33', 9999),
+        # ('172.22.95.33', 9999),
+        # ('172.22.157.34', 9999),
+        # ('172.22.159.34', 9999),
+        # ('172.22.95.34', 9999),
+        # ('172.22.157.35', 9999),
+        # ('172.22.159.35', 9999),
+        # ('172.22.95.35', 9999),
+        ('10.193.255.134', 9999)
     ]
 
     try:
@@ -63,6 +69,7 @@ def main():
 
             global total_matches
             total_matches = 0
+            server_matches.clear()
 
             threads = []
             for server_ip, server_port in servers:
@@ -73,7 +80,10 @@ def main():
             for thread in threads:
                 thread.join()
 
-            print(f"\nTotal matches across all servers: {total_matches}")
+            for name, matches in server_matches.items():
+                print(f"\nFile: {name}: {matches} matches")
+
+            print(f"Total matches across all servers: {total_matches}")
     except Exception as e:
         print(f"An error occurred: {e}")
 
