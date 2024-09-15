@@ -8,7 +8,7 @@ def execute_grep_on_logs(query):
     log_files = [f for f in os.listdir() if f.endswith('.log')]
     result = ""
     total_matches = 0
-
+    file_name = ""
     for log_file in log_files:
         command = ['grep', '-E', '-n', query, log_file]
         try:
@@ -16,17 +16,17 @@ def execute_grep_on_logs(query):
             matches = grep_result.strip().split('\n')
 
             if matches:
-                result += f"\nFile: {log_file}\n"
+                # result += f"\nFile: {log_file}\n"
                 for match in matches:
                     result += f"Line {match.split(':')[0]}: {match.split(':', 1)[1]}\n"
                 total_matches += len(matches)
             else:
                 result += f"File: {log_file}\nNo matches found\n"
-
+            file_name = f"\nFile: {log_file}\n"
         except subprocess.CalledProcessError:
             result += f"File: {log_file}\nNo matches found\n"
 
-    return result, total_matches
+    return result, total_matches, file_name
 
 def handle_client(client_socket):
     try:
@@ -38,8 +38,10 @@ def handle_client(client_socket):
             
             print(f"Received query: {query}")
             
-            result, total_matches = execute_grep_on_logs(query)
+            result, total_matches, file_name = execute_grep_on_logs(query)
             
+            client_socket.send(file_name.encode('utf-8'))
+
             client_socket.send(result.encode('utf-8'))
             
             client_socket.send(b"EOF")
