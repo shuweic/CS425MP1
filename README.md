@@ -5,7 +5,7 @@
 This project implements a basic client-server architecture for querying log files in a distributed system. The server listens for incoming requests from clients, processes the queries, and returns the relevant log entries.
 
 
-## Structur
+## Structure
 
 ```bash
 project_root/
