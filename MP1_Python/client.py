@@ -1,5 +1,7 @@
 import socket
 import threading
+import argparse
+import time
 
 lock = threading.Lock()
 total_matches = 0
@@ -57,6 +59,8 @@ def main():
         ('172.22.157.35', 9999),
         ('172.22.159.35', 9999),
         ('172.22.95.35', 9999),
+        
+        # ('192.168.10.12', 9999),
         # ('10.193.255.134', 9999)
     ]
 
@@ -71,6 +75,8 @@ def main():
             total_matches = 0
             server_matches.clear()
 
+            start_time = time.time()
+
             threads = []
             for server_ip, server_port in servers:
                 thread = threading.Thread(target=query_server, args=(server_ip, server_port, query))
@@ -80,10 +86,14 @@ def main():
             for thread in threads:
                 thread.join()
 
+            end_time = time.time()
+            latency = (end_time - start_time) * 1000
+
             for name, matches in server_matches.items():
                 print(f"\nFile: {name}: {matches} matches")
 
             print(f"Total matches across all servers: {total_matches}")
+            print(f"Total latency: {latency}ms\n")
     except Exception as e:
         print(f"An error occurred: {e}")
 
