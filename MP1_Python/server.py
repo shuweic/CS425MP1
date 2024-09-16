@@ -22,8 +22,8 @@ def execute_grep_on_logs(query):
     # Process each log file
     for log_file in log_files:
         # Construct the grep command
-        # command = ['grep', '-E', '-n', query, log_file]
-        command = [query, log_file]
+        command = ['grep', '-E', '-n', query, log_file]
+        # command = [query, log_file]
         try:
             # Execute the grep command and capture the output
             grep_result = subprocess.check_output(command, stderr=subprocess.STDOUT, universal_newlines=True)
