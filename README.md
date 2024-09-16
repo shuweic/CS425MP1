@@ -13,6 +13,9 @@ project_root/
 └── xxx.log   <-- Log file go here
 ```
 
+## Prepare
+
+    In client.py, update the servers variable with the correct IP addresses and port numbers under the section labeled '# List of servers to query'.
 
 ## How to run
 
@@ -21,4 +24,10 @@ project_root/
 ```
 ```bash
     python cs425_g87/MP1_Python/client.py
+```
+
+## Unit test
+
+```bash
+    python cs425_g87/MP1_Python/test.py
 ```
