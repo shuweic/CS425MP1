@@ -15,7 +15,7 @@ project_root/
 
 ## Prepare
 
-    In client.py, update the servers variable with the correct IP addresses and port numbers under the section labeled '# List of servers to query'.
+In client.py, update the servers variable with the correct IP addresses and port numbers under the section labeled '# List of servers to query'.
 
 ## How to run
 
