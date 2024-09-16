@@ -15,7 +15,11 @@ project_root/
 
 ## Prepare
 
-In client.py, update the servers variable with the correct IP addresses and port numbers under the section labeled '# List of servers to query'.
+```bash
+    pip install python-dotenv
+```
+
+Also update the `.env` file with the IP address and port number of your server.
 
 ## How to run
 
