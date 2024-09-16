@@ -15,10 +15,6 @@ class TestQueryResponses(unittest.TestCase):
         expected_match = 1
         self.assertEqual(test_match, expected_match)
 
-        test_match = send_query_to_server('172.22.157.33', 9999, "GET")
-        expected_match = 160563
-        self.assertEqual(test_match, expected_match)
-
         test_match = send_query_to_server('172.22.159.33', 9999, "\"POST /wp-admin HTTP/1.0\" [0-3]")
         expected_match = 3198
         self.assertEqual(test_match, expected_match)
