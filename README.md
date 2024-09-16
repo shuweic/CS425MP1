@@ -16,7 +16,11 @@ project_root/
 ## Prepare
 
 ```bash
-    pip install python-dotenv
+    sudo dnf install python3-pip
+```
+
+```bash
+    pip3 install python-dotenv
 ```
 
 Also update the `.env` file with the IP address and port number of your server.
